@@ -14,7 +14,7 @@ datasource db {
 }
 
 model Profile {
-  id        String    @id @default(uuid()) @map("_id")
+  id        String    @id @default(uuid())
   userId    String    @unique
   name      String
   imageUrl  String    @db.Text
@@ -27,7 +27,7 @@ model Profile {
 }
 
 model Server {
-  id         String @id @default(uuid()) @map("_id")
+  id         String @id @default(uuid())
   name       String
   imageUrl   String @db.Text
   inviteCode String @unique
@@ -51,7 +51,7 @@ enum MemberRole {
 }
 
 model Member {
-  id   String     @id @default(uuid()) @map("_id")
+  id   String     @id @default(uuid())
   role MemberRole @default(GUEST)
 
   profileId String
@@ -74,7 +74,7 @@ enum ChannelType {
 }
 
 model Channel {
-  id   String      @id @default(uuid()) @map("_id")
+  id   String      @id @default(uuid())
   name String
   type ChannelType @default(TEXT)
 
