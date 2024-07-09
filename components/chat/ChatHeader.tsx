@@ -2,6 +2,7 @@ import { Hash } from 'lucide-react';
 import React, { FC } from 'react';
 import MobileToggle from '../mobile-toggle';
 import UserAvatar from '../user-avatar';
+import SocketIndicator from '../socket-indicator';
 
 interface IProps {
   serverId: string;
@@ -21,6 +22,9 @@ const ChatHeader: FC<IProps> = ({ serverId, name, type, imageUrl }) => {
         <UserAvatar className="h-8 w-8 mr-2" src={imageUrl} />
       )}
       <p className="font-semibold text-md text-black dark:text-white">{name}</p>
+      <div className="ml-auto flex items-center">
+        <SocketIndicator />
+      </div>
     </div>
   );
 };
