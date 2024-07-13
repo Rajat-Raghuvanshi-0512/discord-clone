@@ -6,65 +6,67 @@ export async function POST(req: NextRequest) {
   try {
     const { content, fileUrl } = await req.json();
     const { searchParams } = new URL(req.url);
-    const serverId = searchParams.get('serverId');
-    const channelId = searchParams.get('channelId');
+    const conversationId = searchParams.get('conversationId');
     const profile = await currentProfile();
 
     if (!profile) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
-    if (!serverId) {
-      return new NextResponse('Server id not found', { status: 400 });
-    }
-    if (!channelId) {
-      return new NextResponse('Channel id not found', { status: 400 });
+    if (!conversationId) {
+      return new NextResponse('Conversation Id not found', { status: 400 });
     }
     if (!content) {
       return new NextResponse('Content not found', { status: 400 });
     }
 
-    const server = await db.server.findFirst({
+    const conversation = await db.conversation.findFirst({
       where: {
-        id: serverId,
-        members: {
-          some: {
-            profileId: profile.id,
+        id: conversationId,
+        OR: [
+          {
+            memberOne: {
+              profileId: profile.id,
+            },
+          },
+          {
+            memberTwo: {
+              profileId: profile.id,
+            },
+          },
+        ],
+      },
+      include: {
+        memberOne: {
+          include: {
+            profile: true,
+          },
+        },
+        memberTwo: {
+          include: {
+            profile: true,
           },
         },
       },
-      include: {
-        members: true,
-      },
     });
 
-    if (!server) {
-      return new NextResponse('Server not found', { status: 404 });
+    if (!conversation) {
+      return new NextResponse('Conversation not found', { status: 404 });
     }
 
-    const channel = await db.channel.findFirst({
-      where: {
-        id: channelId,
-        serverId,
-      },
-    });
-
-    if (!channel) {
-      return new NextResponse('Channel not found', { status: 404 });
-    }
-
-    const member = server.members.find(
-      (member) => member.profileId === profile.id
-    );
+    const member =
+      conversation.memberOne.profileId === profile.id
+        ? conversation.memberOne
+        : conversation.memberTwo;
 
     if (!member) {
       return new NextResponse('Member not found', { status: 404 });
     }
 
-    const message = await db.message.create({
+    const message = await db.directMessage.create({
       data: {
         content,
         fileUrl,
-        channelId,
+        conversationId,
         memberId: member.id,
       },
       include: {
@@ -76,11 +78,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const channelKey = `chat:${channelId}:messages`;
+    const channelKey = `chat:${conversationId}:messages`;
     (req as any)?.io?.emit(channelKey, message);
     return NextResponse.json(message);
   } catch (error) {
-    console.log('[IO_MESSAGES_POST]', error);
+    console.log('[IO_DIRECT_MESSAGES_POST]', error);
     return new NextResponse('Internal Error', { status: 500 });
   }
 }

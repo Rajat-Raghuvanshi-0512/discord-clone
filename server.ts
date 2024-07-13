@@ -1,21 +1,33 @@
-// server.ts
-
 const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
 const Server = require('socket.io').Server;
 
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = 'localhost';
-const port = 3000;
+const hostname =
+  process.env.NODE_ENV !== 'production'
+    ? 'localhost'
+    : process.env.NEXT_PUBLIC_HOSTNAME;
+const port =
+  process.env.NODE_ENV !== 'production' ? 3000 : process.env.NEXT_PUBLIC_PORT;
 // when using middleware `hostname` and `port` must be provided below
+
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
-app.prepare().then(() => {
-  const httpServer = createServer(handler);
+interface SocketApiRequest extends Request {
+  io?: typeof Server;
+}
 
-  const io = new Server(httpServer);
+const io = new Server();
+app.prepare().then(() => {
+  const httpServer = createServer((req: SocketApiRequest, res: Response) => {
+    req.io = io;
+    handler(req, res);
+  });
+
+  io.attach(httpServer);
+  //(global as any).io = io;
 
   io.on('connection', (socket: any) => {
     console.log('User connected');

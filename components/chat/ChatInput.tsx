@@ -9,6 +9,7 @@ import { Input } from '../ui/input';
 import queryString from 'query-string';
 import axios from 'axios';
 import { useModal } from '@/hooks/useModal';
+import EmojiPicker from '../emoji-picker';
 
 interface IProps {
   apiUrl: string;
@@ -38,7 +39,6 @@ const ChatInput: FC<IProps> = ({ apiUrl, name, query, type }) => {
         query,
       });
       await axios.post(url, values);
-      console.log(values);
       form.reset();
     } catch (error) {
       console.log(error);
@@ -70,7 +70,11 @@ const ChatInput: FC<IProps> = ({ apiUrl, name, query, type }) => {
                     {...field}
                   />
                   <div className="absolute top-7 right-8">
-                    <Smile />
+                    <EmojiPicker
+                      onChange={(emoji: string) =>
+                        field.onChange(`${field.value}${emoji}`)
+                      }
+                    />
                   </div>
                 </div>
               </FormControl>

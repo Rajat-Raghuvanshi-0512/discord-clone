@@ -11,6 +11,7 @@ import DeleteServerModal from '../modals/DeleteServerModal';
 import DeleteChannelModal from '../modals/DeleteChannelModal';
 import EditChannelModal from '../modals/editChannelModal';
 import SendFileModal from '../modals/SendFileModal';
+import DeleteMessageModal from '../modals/DeleteMessageModal';
 
 export const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -32,6 +33,7 @@ export const ModalProvider = () => {
       <DeleteChannelModal />
       <EditChannelModal />
       <SendFileModal />
+      <DeleteMessageModal />
     </>
   );
 };
